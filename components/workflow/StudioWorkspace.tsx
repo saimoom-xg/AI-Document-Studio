@@ -141,11 +141,15 @@ export default function StudioWorkspace() {
 
       if (parsed.text) {
         try {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 3500);
           const res = await fetch('/api/analyze', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fileName: file.name, text: parsed.text.slice(0, 24000) }),
+            signal: controller.signal,
           });
+          clearTimeout(timer);
           if (res.ok) {
             const result = (await res.json()) as {
               type?: DocumentType;
@@ -160,7 +164,7 @@ export default function StudioWorkspace() {
             }
           }
         } catch {
-          // fallback
+          // fallback gracefully to client heuristic extraction
         }
       }
 
@@ -181,11 +185,19 @@ export default function StudioWorkspace() {
       setSelectedTemplate(initialTemplate);
       window.sessionStorage.setItem(`document:${id}`, JSON.stringify(newDoc));
       window.sessionStorage.setItem('document:active', JSON.stringify(newDoc));
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href);
+        url.searchParams.set('id', id);
+        window.history.pushState({ docId: id }, '', url.toString());
+      }
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Failed to parse file.');
     } finally {
       setIsProcessing(false);
       setProcessingStage('');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 
@@ -206,12 +218,22 @@ export default function StudioWorkspace() {
     setSelectedTemplate(def.defaultTemplate || def.templates[0]?.id || 'Modern');
     window.sessionStorage.setItem(`document:${id}`, JSON.stringify(newDoc));
     window.sessionStorage.setItem('document:active', JSON.stringify(newDoc));
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('id', id);
+      window.history.pushState({ docId: id }, '', url.toString());
+    }
   };
 
   const handleReset = () => {
     setDocument(null);
     setErrorMessage('');
     window.sessionStorage.removeItem('document:active');
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('id');
+      window.history.pushState(null, '', url.toString());
+    }
   };
 
   const getExportFileName = () => {
