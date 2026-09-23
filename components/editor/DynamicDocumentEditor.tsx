@@ -151,7 +151,7 @@ export default function DynamicDocumentEditor({
     const next: ReportSection = {
       id: `sec-${Date.now()}`,
       title: 'New Section Heading',
-      content: 'Detailed discussion and analysis...',
+      content: 'Discussion and details...',
     };
     updateField('sections', [...reportSections, next]);
   };
@@ -175,88 +175,89 @@ export default function DynamicDocumentEditor({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 text-xs font-sans">
       {definition.sections.map((section) => (
         <div
           key={section.id}
-          className="rounded-xl border border-slate-200/90 bg-white p-5 shadow-xs space-y-4"
+          className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-2xs space-y-3"
         >
-          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">{section.title}</h3>
+              <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">{section.title}</h3>
               {section.description && (
-                <p className="text-xs text-slate-500 mt-0.5">{section.description}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{section.description}</p>
               )}
             </div>
+
             {section.kind === 'items' && (
               <button
                 type="button"
                 onClick={handleAddItem}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-800 transition"
               >
-                <Plus className="h-3.5 w-3.5" /> Add Item
+                <Plus className="h-3 w-3" /> Add Item
               </button>
             )}
             {section.kind === 'experience' && (
               <button
                 type="button"
                 onClick={handleAddExperience}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-800 transition"
               >
-                <Plus className="h-3.5 w-3.5" /> Add Experience
+                <Plus className="h-3 w-3" /> Add Experience
               </button>
             )}
             {section.kind === 'education' && (
               <button
                 type="button"
                 onClick={handleAddEducation}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-800 transition"
               >
-                <Plus className="h-3.5 w-3.5" /> Add Education
+                <Plus className="h-3 w-3" /> Add Education
               </button>
             )}
             {section.kind === 'expenses' && (
               <button
                 type="button"
                 onClick={handleAddExpense}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-800 transition"
               >
-                <Plus className="h-3.5 w-3.5" /> Add Expense
+                <Plus className="h-3 w-3" /> Add Expense
               </button>
             )}
             {section.kind === 'sections' && (
               <button
                 type="button"
                 onClick={handleAddReportSection}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700 hover:bg-blue-100 transition"
+                className="inline-flex items-center gap-1 rounded-md bg-slate-100 hover:bg-slate-200 px-2 py-1 text-[11px] font-semibold text-slate-800 transition"
               >
-                <Plus className="h-3.5 w-3.5" /> Add Section
+                <Plus className="h-3 w-3" /> Add Section
               </button>
             )}
           </div>
 
-          {/* Standard Fields Section */}
+          {/* Standard Fields */}
           {(!section.kind || section.kind === 'fields') && section.fields && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {section.fields.map((field) => {
                 const val = d[field.key] ?? '';
                 const strVal = Array.isArray(val) ? val.join(', ') : String(val);
                 return (
                   <label
                     key={field.key}
-                    className={`space-y-1 text-left ${field.multiline ? 'sm:col-span-2' : ''}`}
+                    className={`space-y-1 block ${field.multiline ? 'sm:col-span-2' : ''}`}
                   >
-                    <span className="text-xs font-medium text-slate-700 flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-slate-600 flex items-center justify-between">
                       {field.label}
-                      {field.required && <span className="text-rose-500 text-[10px]">*</span>}
+                      {field.required && <span className="text-rose-500 font-bold">*</span>}
                     </span>
                     {field.multiline ? (
                       <textarea
                         value={strVal}
                         placeholder={field.placeholder}
                         onChange={(e) => updateField(field.key, e.target.value)}
-                        rows={3}
-                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
+                        rows={2}
+                        className="w-full rounded-md border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
                       />
                     ) : (
                       <input
@@ -264,7 +265,7 @@ export default function DynamicDocumentEditor({
                         value={strVal}
                         placeholder={field.placeholder}
                         onChange={(e) => updateField(field.key, e.target.value)}
-                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
+                        className="w-full rounded-md border border-slate-200 bg-slate-50/50 px-2.5 py-1.5 text-xs text-slate-900 placeholder:text-slate-400 focus:bg-white focus:border-slate-400 focus:ring-1 focus:ring-slate-300 focus:outline-none transition"
                       />
                     )}
                   </label>
@@ -273,16 +274,16 @@ export default function DynamicDocumentEditor({
             </div>
           )}
 
-          {/* Line Items Table Section */}
+          {/* Line Items Table */}
           {section.kind === 'items' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {items.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-xs text-slate-500">
-                  No line items yet. Click &ldquo;Add Item&rdquo; to start.
+                <div className="rounded-lg border border-dashed border-slate-200 py-4 text-center text-slate-400 text-xs">
+                  No line items yet. Click &ldquo;Add Item&rdquo; above.
                 </div>
               ) : (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-[1fr_70px_90px_80px_32px] gap-2 px-1 text-[11px] font-semibold text-slate-500 uppercase">
+                <div className="space-y-1.5">
+                  <div className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                     <span>Description</span>
                     <span className="text-right">Qty</span>
                     <span className="text-right">Price</span>
@@ -296,21 +297,21 @@ export default function DynamicDocumentEditor({
                     return (
                       <div
                         key={it.id || idx}
-                        className="grid grid-cols-[1fr_70px_90px_80px_32px] gap-2 items-center bg-slate-50/50 p-2 rounded-lg border border-slate-200/70"
+                        className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded-md border border-slate-200/80"
                       >
                         <input
                           type="text"
                           value={it.description}
-                          placeholder="Item name / description"
+                          placeholder="Item name"
                           onChange={(e) => handleUpdateItem(idx, 'description', e.target.value)}
-                          className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                          className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none focus:border-slate-400"
                         />
                         <input
                           type="number"
                           value={it.quantity}
                           min={1}
                           onChange={(e) => handleUpdateItem(idx, 'quantity', parseFloat(e.target.value) || 0)}
-                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-right text-slate-900 focus:border-blue-500 focus:outline-none"
+                          className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-right text-slate-900 focus:outline-none"
                         />
                         <input
                           type="number"
@@ -318,7 +319,7 @@ export default function DynamicDocumentEditor({
                           min={0}
                           step={0.01}
                           onChange={(e) => handleUpdateItem(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
-                          className="w-full rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-right text-slate-900 focus:border-blue-500 focus:outline-none"
+                          className="w-full rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-right text-slate-900 focus:outline-none"
                         />
                         <div className="text-right text-xs font-semibold text-slate-800 pr-1">
                           {tot.toFixed(2)}
@@ -329,7 +330,7 @@ export default function DynamicDocumentEditor({
                           className="p-1 text-slate-400 hover:text-rose-600 rounded transition"
                           title="Remove item"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3 w-3" />
                         </button>
                       </div>
                     );
@@ -339,107 +340,55 @@ export default function DynamicDocumentEditor({
             </div>
           )}
 
-          {/* Work Experience Section */}
+          {/* Work Experience */}
           {section.kind === 'experience' && (
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {experiences.map((exp, idx) => (
                 <div
                   key={exp.id || idx}
-                  className="rounded-lg border border-slate-200 bg-slate-50/40 p-3 space-y-3 relative"
+                  className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-2 relative"
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <input
                       type="text"
                       value={exp.role}
                       placeholder="Role / Title"
                       onChange={(e) => handleUpdateExperience(idx, 'role', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-900 focus:outline-none focus:border-slate-400"
                     />
                     <input
                       type="text"
                       value={exp.company}
                       placeholder="Company"
                       onChange={(e) => handleUpdateExperience(idx, 'company', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={exp.period}
                       placeholder="Period (e.g. 2021 — Present)"
                       onChange={(e) => handleUpdateExperience(idx, 'period', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
                     />
                     <input
                       type="text"
                       value={exp.location || ''}
                       placeholder="Location (Optional)"
                       onChange={(e) => handleUpdateExperience(idx, 'location', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
                     />
                   </div>
                   <textarea
                     value={exp.description}
-                    placeholder="Description of accomplishments and projects..."
+                    placeholder="Accomplishments and responsibilities..."
                     rows={2}
                     onChange={(e) => handleUpdateExperience(idx, 'description', e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
                   />
                   <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={() => handleRemoveExperience(idx)}
-                      className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-600 transition"
-                    >
-                      <Trash2 className="h-3 w-3" /> Remove Experience
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Education Section */}
-          {section.kind === 'education' && (
-            <div className="space-y-3">
-              {education.map((edu, idx) => (
-                <div
-                  key={edu.id || idx}
-                  className="rounded-lg border border-slate-200 bg-slate-50/40 p-3 space-y-2 relative"
-                >
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      value={edu.degree}
-                      placeholder="Degree / Field"
-                      onChange={(e) => handleUpdateEducation(idx, 'degree', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-900 focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      value={edu.institution}
-                      placeholder="Institution"
-                      onChange={(e) => handleUpdateEducation(idx, 'institution', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      value={edu.period}
-                      placeholder="Years (e.g. 2018 — 2022)"
-                      onChange={(e) => handleUpdateEducation(idx, 'period', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
-                    />
-                    <input
-                      type="text"
-                      value={edu.details || ''}
-                      placeholder="Honors / Details (Optional)"
-                      onChange={(e) => handleUpdateEducation(idx, 'details', e.target.value)}
-                      className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
-                    />
-                  </div>
-                  <div className="flex justify-end">
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveEducation(idx)}
                       className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-600 transition"
                     >
                       <Trash2 className="h-3 w-3" /> Remove
@@ -450,47 +399,92 @@ export default function DynamicDocumentEditor({
             </div>
           )}
 
-          {/* Expenses Section */}
+          {/* Education */}
+          {section.kind === 'education' && (
+            <div className="space-y-2">
+              {education.map((edu, idx) => (
+                <div
+                  key={edu.id || idx}
+                  className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 space-y-2"
+                >
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={edu.degree}
+                      placeholder="Degree"
+                      onChange={(e) => handleUpdateEducation(idx, 'degree', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-900 focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      value={edu.institution}
+                      placeholder="Institution"
+                      onChange={(e) => handleUpdateEducation(idx, 'institution', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
+                    />
+                  </div>
+                  <div className="flex justify-between items-center pt-1">
+                    <input
+                      type="text"
+                      value={edu.period}
+                      placeholder="Years"
+                      onChange={(e) => handleUpdateEducation(idx, 'period', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-900 w-32 focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveEducation(idx)}
+                      className="text-[11px] text-slate-400 hover:text-rose-600"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Expenses */}
           {section.kind === 'expenses' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {expenses.map((ex, idx) => (
                 <div
                   key={ex.id || idx}
-                  className="grid grid-cols-[100px_100px_1fr_90px_32px] gap-2 items-center bg-slate-50/50 p-2 rounded-lg border border-slate-200"
+                  className="grid grid-cols-[90px_90px_1fr_80px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded border border-slate-200"
                 >
                   <input
                     type="date"
                     value={ex.date}
                     onChange={(e) => handleUpdateExpense(idx, 'date', e.target.value)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900"
+                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
                   />
                   <input
                     type="text"
                     value={ex.category}
                     placeholder="Category"
                     onChange={(e) => handleUpdateExpense(idx, 'category', e.target.value)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-slate-900"
+                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
                   />
                   <input
                     type="text"
                     value={ex.description}
                     placeholder="Description"
                     onChange={(e) => handleUpdateExpense(idx, 'description', e.target.value)}
-                    className="rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900"
+                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
                   />
                   <input
                     type="number"
                     value={ex.amount}
                     placeholder="0.00"
                     onChange={(e) => handleUpdateExpense(idx, 'amount', parseFloat(e.target.value) || 0)}
-                    className="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-xs text-right text-slate-900"
+                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-right"
                   />
                   <button
                     type="button"
                     onClick={() => handleRemoveExpense(idx)}
                     className="p-1 text-slate-400 hover:text-rose-600"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-3 w-3" />
                   </button>
                 </div>
               ))}
@@ -499,33 +493,33 @@ export default function DynamicDocumentEditor({
 
           {/* Report Sections */}
           {section.kind === 'sections' && (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {reportSections.map((sec, idx) => (
                 <div
                   key={sec.id || idx}
-                  className="rounded-lg border border-slate-200 bg-slate-50/40 p-3 space-y-2"
+                  className="rounded-lg border border-slate-200 bg-slate-50/60 p-2.5 space-y-2"
                 >
                   <input
                     type="text"
                     value={sec.title}
                     placeholder="Section Title"
                     onChange={(e) => handleUpdateReportSection(idx, 'title', e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs font-semibold text-slate-900 focus:outline-none"
                   />
                   <textarea
                     value={sec.content}
                     placeholder="Section content..."
-                    rows={3}
+                    rows={2}
                     onChange={(e) => handleUpdateReportSection(idx, 'content', e.target.value)}
-                    className="w-full rounded-md border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-900 focus:border-blue-500 focus:outline-none"
+                    className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs text-slate-900 focus:outline-none"
                   />
                   <div className="flex justify-end">
                     <button
                       type="button"
                       onClick={() => handleRemoveReportSection(idx)}
-                      className="inline-flex items-center gap-1 text-[11px] text-slate-400 hover:text-rose-600 transition"
+                      className="text-[11px] text-slate-400 hover:text-rose-600"
                     >
-                      <Trash2 className="h-3 w-3" /> Remove Section
+                      Remove Section
                     </button>
                   </div>
                 </div>
@@ -535,37 +529,37 @@ export default function DynamicDocumentEditor({
         </div>
       ))}
 
-      {/* Raw Extracted Text Reference Drawer */}
+      {/* Extracted Raw Text Reference */}
       {Boolean(d.extractedText) && (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-xs">
+        <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-2xs">
           <button
             type="button"
             onClick={() => setShowRawText(!showRawText)}
-            className="w-full flex items-center justify-between text-xs font-semibold text-slate-700 hover:text-slate-900 transition"
+            className="w-full flex items-center justify-between text-xs font-semibold text-slate-600 hover:text-slate-900 transition"
           >
-            <span className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-blue-600" />
-              Original Extracted File Text
+            <span className="flex items-center gap-1.5">
+              <FileText className="h-3.5 w-3.5 text-slate-500" />
+              Source Text Extracted
             </span>
-            <span className="flex items-center gap-1 text-slate-400">
-              {showRawText ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            <span className="text-slate-400">
+              {showRawText ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
             </span>
           </button>
 
           {showRawText && (
-            <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
-              <div className="flex justify-between items-center text-[11px] text-slate-500">
-                <span>Direct text content parsed from original upload</span>
+            <div className="mt-2.5 pt-2.5 border-t border-slate-100 space-y-2">
+              <div className="flex justify-between items-center text-[10px] text-slate-400">
+                <span>Text content parsed from uploaded document</span>
                 <button
                   type="button"
                   onClick={copyExtractedText}
-                  className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 font-medium"
+                  className="inline-flex items-center gap-1 text-slate-600 hover:text-slate-900 font-medium"
                 >
                   {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-                  {copied ? 'Copied' : 'Copy Text'}
+                  {copied ? 'Copied' : 'Copy'}
                 </button>
               </div>
-              <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-lg bg-slate-50 p-3 text-[11px] text-slate-700 font-mono border border-slate-200">
+              <pre className="max-h-40 overflow-y-auto whitespace-pre-wrap rounded-md bg-slate-50 p-2 text-[10px] text-slate-600 font-mono border border-slate-200">
                 {String(d.extractedText)}
               </pre>
             </div>
