@@ -26,18 +26,25 @@ export async function POST(request: Request) {
       });
     }
 
-    const prompt = `You are an expert document analysis AI. Analyze the uploaded document and return only valid JSON matching this schema:
+    const prompt = `You are a precision document analysis AI. Analyze the uploaded document text and return only valid JSON matching this schema:
 {
   "type": "<one of: ${supportedTypes.join(', ')}>",
   "confidence": <number between 0.0 and 1.0>,
   "data": {
-    <appropriate extracted fields for this document type, such as items array with description, quantity, unitPrice, total for invoices/receipts/quotes/orders; fullName, jobTitle, summary, skills, experience array, education array for CV/resumes; title, author, summary, sections array for reports; employee, expenses array for expense reports>
+    <strictly extracted fields: items array with description, quantity, unitPrice, total for invoices/receipts/quotes/orders; fullName, jobTitle, email, phone, location, website, summary, skills, experience array, education array for CV/resumes; title, author, summary, sections array for reports; employee, expenses array for expense reports>
   }
 }
+
+CRITICAL RULES:
+1. ONLY extract information that is explicitly stated in the document text.
+2. NEVER invent, hallucinate, or substitute fictional emails (like john@example.com), fictional phone numbers (like 555-0199), fictional names, or fictional addresses.
+3. If an email, phone number, address, or other field is NOT present in the text, DO NOT invent one; omit it or leave it as empty string "".
+4. Preserve numbers, items, prices, and dates exactly as written.
 
 Filename: ${fileName}
 Content:
 ${text || '[No text could be extracted in the browser]'}`;
+
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',

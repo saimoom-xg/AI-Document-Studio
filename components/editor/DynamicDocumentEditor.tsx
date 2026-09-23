@@ -282,23 +282,24 @@ export default function DynamicDocumentEditor({
                   No line items yet. Click &ldquo;Add Item&rdquo; above.
                 </div>
               ) : (
-                <div className="space-y-1.5">
-                  <div className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    <span>Description</span>
-                    <span className="text-right">Qty</span>
-                    <span className="text-right">Price</span>
-                    <span className="text-right">Total</span>
-                    <span />
-                  </div>
-                  {items.map((it, idx) => {
-                    const q = Number(it.quantity || 1);
-                    const p = Number(it.unitPrice || 0);
-                    const tot = it.total ?? (q * p);
-                    return (
-                      <div
-                        key={it.id || idx}
-                        className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded-md border border-slate-200/80"
-                      >
+                <div className="overflow-x-auto">
+                  <div className="min-w-[340px] space-y-1.5">
+                    <div className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      <span>Description</span>
+                      <span className="text-right">Qty</span>
+                      <span className="text-right">Price</span>
+                      <span className="text-right">Total</span>
+                      <span />
+                    </div>
+                    {items.map((it, idx) => {
+                      const q = Number(it.quantity || 1);
+                      const p = Number(it.unitPrice || 0);
+                      const tot = it.total ?? (q * p);
+                      return (
+                        <div
+                          key={it.id || idx}
+                          className="grid grid-cols-[1fr_56px_74px_74px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded-md border border-slate-200/80"
+                        >
                         <input
                           type="text"
                           value={it.description}
@@ -335,6 +336,7 @@ export default function DynamicDocumentEditor({
                       </div>
                     );
                   })}
+                  </div>
                 </div>
               )}
             </div>
@@ -446,48 +448,50 @@ export default function DynamicDocumentEditor({
 
           {/* Expenses */}
           {section.kind === 'expenses' && (
-            <div className="space-y-2">
-              {expenses.map((ex, idx) => (
-                <div
-                  key={ex.id || idx}
-                  className="grid grid-cols-[90px_90px_1fr_80px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded border border-slate-200"
-                >
-                  <input
-                    type="date"
-                    value={ex.date}
-                    onChange={(e) => handleUpdateExpense(idx, 'date', e.target.value)}
-                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
-                  />
-                  <input
-                    type="text"
-                    value={ex.category}
-                    placeholder="Category"
-                    onChange={(e) => handleUpdateExpense(idx, 'category', e.target.value)}
-                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
-                  />
-                  <input
-                    type="text"
-                    value={ex.description}
-                    placeholder="Description"
-                    onChange={(e) => handleUpdateExpense(idx, 'description', e.target.value)}
-                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
-                  />
-                  <input
-                    type="number"
-                    value={ex.amount}
-                    placeholder="0.00"
-                    onChange={(e) => handleUpdateExpense(idx, 'amount', parseFloat(e.target.value) || 0)}
-                    className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-right"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveExpense(idx)}
-                    className="p-1 text-slate-400 hover:text-rose-600"
+            <div className="overflow-x-auto">
+              <div className="min-w-[420px] space-y-2">
+                {expenses.map((ex, idx) => (
+                  <div
+                    key={ex.id || idx}
+                    className="grid grid-cols-[90px_90px_1fr_80px_28px] gap-2 items-center bg-slate-50/70 p-1.5 rounded border border-slate-200"
                   >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
-              ))}
+                    <input
+                      type="date"
+                      value={ex.date}
+                      onChange={(e) => handleUpdateExpense(idx, 'date', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={ex.category}
+                      placeholder="Category"
+                      onChange={(e) => handleUpdateExpense(idx, 'category', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
+                    />
+                    <input
+                      type="text"
+                      value={ex.description}
+                      placeholder="Description"
+                      onChange={(e) => handleUpdateExpense(idx, 'description', e.target.value)}
+                      className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs"
+                    />
+                    <input
+                      type="number"
+                      value={ex.amount}
+                      placeholder="0.00"
+                      onChange={(e) => handleUpdateExpense(idx, 'amount', parseFloat(e.target.value) || 0)}
+                      className="rounded border border-slate-200 bg-white px-1.5 py-1 text-xs text-right"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveExpense(idx)}
+                      className="p-1 text-slate-400 hover:text-rose-600"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 

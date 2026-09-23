@@ -307,7 +307,7 @@ function CvMinimalSwissLayout({ data }: { data: Record<string, unknown>; templat
 
       {/* Swiss Grid Section 1: Profile */}
       {summary && (
-        <div className="grid grid-cols-[140px_1fr] gap-6 items-baseline border-b border-slate-200 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-3 sm:gap-6 items-baseline border-b border-slate-200 pb-6">
           <span className="text-xs font-black uppercase tracking-wider text-black">Profile</span>
           <p className="text-xs text-slate-800 leading-relaxed">{summary}</p>
         </div>
@@ -315,7 +315,7 @@ function CvMinimalSwissLayout({ data }: { data: Record<string, unknown>; templat
 
       {/* Swiss Grid Section 2: Experience */}
       {experiences.length > 0 && (
-        <div className="grid grid-cols-[140px_1fr] gap-6 items-baseline border-b border-slate-200 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-3 sm:gap-6 items-baseline border-b border-slate-200 pb-6">
           <span className="text-xs font-black uppercase tracking-wider text-black">Experience</span>
           <div className="space-y-5">
             {experiences.map((exp) => (
@@ -334,7 +334,7 @@ function CvMinimalSwissLayout({ data }: { data: Record<string, unknown>; templat
 
       {/* Swiss Grid Section 3: Education */}
       {education.length > 0 && (
-        <div className="grid grid-cols-[140px_1fr] gap-6 items-baseline border-b border-slate-200 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-3 sm:gap-6 items-baseline border-b border-slate-200 pb-6">
           <span className="text-xs font-black uppercase tracking-wider text-black">Education</span>
           <div className="space-y-3">
             {education.map((edu) => (
@@ -352,7 +352,7 @@ function CvMinimalSwissLayout({ data }: { data: Record<string, unknown>; templat
 
       {/* Swiss Grid Section 4: Skills */}
       {skills && (
-        <div className="grid grid-cols-[140px_1fr] gap-6 items-baseline">
+        <div className="grid grid-cols-1 sm:grid-cols-[140px_1fr] gap-3 sm:gap-6 items-baseline">
           <span className="text-xs font-black uppercase tracking-wider text-black">Skills</span>
           <div className="flex flex-wrap gap-2">
             {skills.split(',').map((skill, idx) => (
@@ -381,7 +381,7 @@ function CvCorporateSidebarLayout({ data, template }: { data: Record<string, unk
   const education = (data.education || []) as CvEducation[];
 
   return (
-    <div className="grid grid-cols-[220px_1fr] min-h-[1080px] font-sans">
+    <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] min-h-[1080px] font-sans">
       {/* Left Full-Height Solid Sidebar */}
       <aside className="p-7 text-white space-y-7" style={{ backgroundColor: template.accentColor }}>
         <div>
@@ -476,7 +476,7 @@ function CvEuropeanGridLayout({ data }: { data: Record<string, unknown>; templat
   return (
     <div className="p-8 sm:p-12 space-y-7 font-sans text-xs">
       {/* European Standard Header */}
-      <div className="grid grid-cols-[180px_1fr] gap-6 border-b pb-5 border-slate-300">
+      <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-4 sm:gap-6 border-b pb-5 border-slate-300">
         <div className="space-y-1 font-semibold text-slate-700">
           <p className="text-xs uppercase text-slate-400 font-bold">Europass CV</p>
           <p>{location}</p>
@@ -498,7 +498,7 @@ function CvEuropeanGridLayout({ data }: { data: Record<string, unknown>; templat
           </h2>
           <div className="space-y-4">
             {experiences.map((exp) => (
-              <div key={exp.id} className="grid grid-cols-[180px_1fr] gap-6">
+              <div key={exp.id} className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2 sm:gap-6">
                 <span className="font-medium text-slate-500">{exp.period}</span>
                 <div className="space-y-1">
                   <p className="font-bold text-slate-900">{exp.role}</p>

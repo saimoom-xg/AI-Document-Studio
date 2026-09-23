@@ -22,6 +22,7 @@ import {
   documentFrom,
   definitionFor,
   sampleDataFor,
+  emptyDataFor,
   documentRegistry,
 } from '@/lib/documents/registry';
 import type { DocumentType, NormalizedDocumentData } from '@/lib/documents/types';
@@ -47,6 +48,7 @@ export default function StudioWorkspace() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStage, setProcessingStage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [exportNotice, setExportNotice] = useState('');
   const [showExportMenu, setShowExportMenu] = useState(false);
 
   // View Mode: 'split' | 'editor' | 'preview'
@@ -85,17 +87,17 @@ export default function StudioWorkspace() {
 
   const handleTypeChange = (newType: DocumentType) => {
     if (!document) return;
-    const today = new Date().toISOString().slice(0, 10);
     const newDef = definitionFor(newType);
-    const defaults = sampleDataFor(newType, today);
+    const emptyDefaults = emptyDataFor(newType);
 
+    // Keep user's real edited data (name, email, phone, items, extractedText) intact!
     const updated: NormalizedDocumentData = {
       ...document,
       type: newType,
       confidence: 1.0,
       data: {
-        ...defaults,
-        extractedText: document.data.extractedText || '',
+        ...emptyDefaults,
+        ...document.data,
       },
       metadata: {
         ...document.metadata,
@@ -106,6 +108,7 @@ export default function StudioWorkspace() {
     handleDocumentChange(updated);
     setSelectedTemplate(newDef.defaultTemplate || newDef.templates[0]?.id || 'Modern');
   };
+
 
   const handleFileUpload = async (files: FileList | null) => {
     const file = files?.[0];
@@ -225,41 +228,77 @@ export default function StudioWorkspace() {
 
   const handleExportPdf = () => {
     if (!document) return;
-    const pdf = renderDocumentPdf(document, selectedTemplate);
-    pdf.save(`${getExportFileName()}.pdf`);
+    try {
+      setExportNotice('Generating vector PDF...');
+      const pdf = renderDocumentPdf(document, selectedTemplate);
+      pdf.save(`${getExportFileName()}.pdf`);
+      setShowExportMenu(false);
+      setExportNotice('PDF downloaded successfully!');
+      setTimeout(() => setExportNotice(''), 3000);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      setExportNotice('Direct download failed. Opening print view...');
+      setTimeout(() => {
+        window.print();
+        setExportNotice('');
+      }, 1000);
+    }
+  };
+
+  const handlePrintPdf = () => {
     setShowExportMenu(false);
+    window.print();
   };
 
   const handleExportExcel = () => {
     if (!document) return;
-    downloadDocumentExcel(document, getExportFileName());
-    setShowExportMenu(false);
+    try {
+      downloadDocumentExcel(document, getExportFileName());
+      setShowExportMenu(false);
+      setExportNotice('Excel spreadsheet downloaded!');
+      setTimeout(() => setExportNotice(''), 3000);
+    } catch (err) {
+      console.error('Excel export error:', err);
+    }
   };
 
   const handleExportCsv = () => {
     if (!document) return;
-    downloadDocumentCsv(document, getExportFileName());
-    setShowExportMenu(false);
+    try {
+      downloadDocumentCsv(document, getExportFileName());
+      setShowExportMenu(false);
+      setExportNotice('CSV file downloaded!');
+      setTimeout(() => setExportNotice(''), 3000);
+    } catch (err) {
+      console.error('CSV export error:', err);
+    }
   };
 
   const handleExportJson = () => {
     if (!document) return;
-    const blob = new Blob([JSON.stringify(document, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = window.document.createElement('a');
-    a.href = url;
-    a.download = `${getExportFileName()}.json`;
-    window.document.body.appendChild(a);
-    a.click();
-    window.document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setShowExportMenu(false);
+    try {
+      const blob = new Blob([JSON.stringify(document, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = `${getExportFileName()}.json`;
+      window.document.body.appendChild(a);
+      a.click();
+      window.document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      setShowExportMenu(false);
+      setExportNotice('JSON data downloaded!');
+      setTimeout(() => setExportNotice(''), 3000);
+    } catch (err) {
+      console.error('JSON export error:', err);
+    }
   };
 
   // ==========================================
   // VIEW 1: CLEAN MINIMALIST UPLOAD SCREEN
   // ==========================================
   if (!document) {
+
     return (
       <main className="min-h-screen px-4 py-8 md:py-16 flex flex-col justify-between font-sans">
         <div className="mx-auto w-full max-w-3xl space-y-10">
@@ -514,23 +553,63 @@ export default function StudioWorkspace() {
                       <p className="text-[10px] text-slate-400">Normalized document</p>
                     </div>
                   </button>
+
+                  <div className="border-t border-slate-100 pt-1">
+                    <button
+                      type="button"
+                      onClick={handlePrintPdf}
+                      className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-slate-700 hover:bg-slate-100 text-left transition"
+                    >
+                      <FileText className="h-3.5 w-3.5 text-slate-500" />
+                      <span className="text-[11px]">Print / Save via Browser</span>
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        {/* Mobile View Toggle */}
-        <div className="flex sm:hidden mt-2 pt-2 border-t border-slate-100 justify-center gap-1.5 text-xs">
+        {/* Mobile View Segmented Switcher */}
+        <div className="flex sm:hidden mt-2 pt-2 border-t border-slate-100 items-center justify-between gap-1 text-xs">
           <button
             type="button"
-            onClick={() => setViewMode(viewMode === 'editor' ? 'preview' : 'editor')}
-            className="flex-1 py-1 rounded-md bg-slate-100 font-semibold text-slate-700 text-center"
+            onClick={() => setViewMode('editor')}
+            className={`flex-1 py-1.5 rounded-md font-medium text-center transition ${
+              viewMode === 'editor' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'bg-slate-100 text-slate-600'
+            }`}
           >
-            {viewMode === 'editor' ? 'Switch to Preview' : 'Switch to Editor'}
+            Editor
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('preview')}
+            className={`flex-1 py-1.5 rounded-md font-medium text-center transition ${
+              viewMode === 'preview' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'bg-slate-100 text-slate-600'
+            }`}
+          >
+            Preview
+          </button>
+          <button
+            type="button"
+            onClick={() => setViewMode('split')}
+            className={`flex-1 py-1.5 rounded-md font-medium text-center transition ${
+              viewMode === 'split' ? 'bg-slate-900 text-white font-semibold shadow-xs' : 'bg-slate-100 text-slate-600'
+            }`}
+          >
+            Both
           </button>
         </div>
+
+        {/* Export Status Toast Banner */}
+        {exportNotice && (
+          <div className="mt-2 py-1 px-3 bg-slate-900 text-white text-[11px] font-medium rounded-md text-center shadow-xs flex items-center justify-center gap-2 animate-fade-in">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            {exportNotice}
+          </div>
+        )}
       </header>
+
 
       {/* Main Studio Body */}
       <div className="flex-1 mx-auto w-full max-w-7xl px-3 sm:px-6 py-5">

@@ -638,6 +638,111 @@ export function sampleDataFor(type: DocumentType, today: string): Record<string,
   }
 }
 
+export function emptyDataFor(type: DocumentType): Record<string, unknown> {
+  switch (type) {
+    case 'cv':
+      return {
+        fullName: '',
+        jobTitle: '',
+        email: '',
+        phone: '',
+        location: '',
+        website: '',
+        linkedin: '',
+        summary: '',
+        skills: '',
+        experience: [] as CvExperience[],
+        education: [] as CvEducation[],
+      };
+    case 'invoice':
+      return {
+        invoiceNumber: '',
+        invoiceDate: '',
+        dueDate: '',
+        currency: 'USD ($)',
+        taxRate: 0,
+        discount: 0,
+        sellerName: '',
+        sellerEmail: '',
+        sellerAddress: '',
+        customerName: '',
+        customerEmail: '',
+        customerAddress: '',
+        items: [] as DocumentItem[],
+        notes: '',
+        terms: '',
+      };
+    case 'receipt':
+      return {
+        receiptNumber: '',
+        date: '',
+        store: '',
+        paymentMethod: '',
+        currency: 'USD ($)',
+        taxRate: 0,
+        items: [] as DocumentItem[],
+        notes: '',
+      };
+    case 'quotation':
+      return {
+        quoteNumber: '',
+        date: '',
+        validUntil: '',
+        currency: 'USD ($)',
+        taxRate: 0,
+        companyName: '',
+        companyAddress: '',
+        clientName: '',
+        clientAddress: '',
+        items: [] as DocumentItem[],
+        notes: '',
+        terms: '',
+      };
+    case 'purchase_order':
+      return {
+        poNumber: '',
+        orderDate: '',
+        deliveryDate: '',
+        currency: 'USD ($)',
+        supplierName: '',
+        supplierAddress: '',
+        buyerName: '',
+        shippingAddress: '',
+        shippingMethod: '',
+        items: [] as DocumentItem[],
+        notes: '',
+      };
+    case 'report':
+      return {
+        title: '',
+        subtitle: '',
+        author: '',
+        date: '',
+        summary: '',
+        sections: [] as ReportSection[],
+        recommendations: '',
+      };
+    case 'expense_report':
+      return {
+        title: '',
+        employee: '',
+        department: '',
+        date: '',
+        currency: 'USD ($)',
+        expenses: [] as ExpenseItem[],
+        notes: '',
+      };
+    default:
+      return {
+        title: '',
+        date: '',
+        author: '',
+        summary: '',
+        notes: '',
+      };
+  }
+}
+
 export function initialDataFor(
   type: DocumentType,
   text: string,
@@ -645,55 +750,69 @@ export function initialDataFor(
   today: string,
   rawParsed?: Record<string, unknown>
 ): Record<string, unknown> {
-  const defaults = sampleDataFor(type, today);
+  // Start with clean, EMPTY fields for the uploaded document - NEVER inject fake sample data!
+  const data: Record<string, unknown> = emptyDataFor(type);
+  data.title = fileName.replace(/\.[^.]+$/, '');
+  data.extractedText = text || '';
 
-  // If we have AI or parser parsed data, merge it nicely
+  // 1. If we have raw parsed data from parser/AI, carefully merge real values
   if (rawParsed && Object.keys(rawParsed).length > 0) {
-    return {
-      ...defaults,
-      ...rawParsed,
-      extractedText: text || String(rawParsed.extractedText || ''),
-    };
+    Object.entries(rawParsed).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '') {
+        data[k] = v;
+      }
+    });
   }
 
-  // Otherwise, use heuristic extraction to populate from raw text if present
+  // 2. Perform intelligent heuristic extraction from the actual document text
   if (text) {
-    const extracted: Record<string, unknown> = { ...defaults };
     const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-    const phoneMatch = text.match(/(?:\+?\d{1,3}[ -]?)?\(?\d{3}\)?[ -]?\d{3}[ -]?\d{4}/);
+    const phoneMatch = text.match(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{2,4}\)?[-.\s]?\d{3,4}[-.\s]?\d{3,4}/);
     const dateMatch = text.match(/\b\d{4}[-/.]\d{1,2}[-/.]\d{1,2}\b|\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]* \d{1,2},? \d{4}\b/i);
 
     if (type === 'cv') {
+      if (!data.email && emailMatch) data.email = emailMatch[0];
+      if (!data.phone && phoneMatch) data.phone = phoneMatch[0];
+
       const lines = text.split('\n').map((l) => l.trim()).filter(Boolean);
-      if (lines.length > 0) extracted.fullName = lines[0].replace(/^(Name:?|Curriculum Vitae|Resume)\s*/i, '');
-      if (emailMatch) extracted.email = emailMatch[0];
-      if (phoneMatch) extracted.phone = phoneMatch[0];
-      extracted.summary = text.slice(0, 500);
+      if (!data.fullName && lines.length > 0) {
+        const candidate = lines[0].replace(/^(curriculum vitae|resume|cv)\s*:?\s*/i, '');
+        if (candidate.length > 2 && candidate.length < 50 && !candidate.includes('@')) {
+          data.fullName = candidate;
+        }
+      }
+
+      // Try finding job title
+      if (!data.jobTitle && lines.length > 1) {
+        const line2 = lines[1];
+        if (!line2.includes('@') && !line2.match(/\d{4}/) && line2.length < 60) {
+          data.jobTitle = line2;
+        }
+      }
+
+      if (!data.summary) {
+        data.summary = text.slice(0, 400);
+      }
     } else if (type === 'invoice') {
       const invMatch = text.match(/(?:invoice|inv|bill)\s*(?:#|no\.?|num)?\s*[:.\s]?\s*([a-zA-Z0-9-_]+)/i);
-      if (invMatch) extracted.invoiceNumber = invMatch[1];
-      if (dateMatch) extracted.invoiceDate = dateMatch[0];
+      if (!data.invoiceNumber && invMatch) data.invoiceNumber = invMatch[1];
+      if (!data.invoiceDate && dateMatch) data.invoiceDate = dateMatch[0];
     } else if (type === 'receipt') {
-      const recMatch = text.match(/(?:receipt|rcpt|order)\s*(?:#|no\.?)?\s*[:.\s]?\s*([a-zA-Z0-9-_]+)/i);
-      if (recMatch) extracted.receiptNumber = recMatch[1];
-      if (dateMatch) extracted.date = dateMatch[0];
+      const recMatch = text.match(/(?:receipt|rcpt|ticket|order)\s*(?:#|no\.?)?\s*[:.\s]?\s*([a-zA-Z0-9-_]+)/i);
+      if (!data.receiptNumber && recMatch) data.receiptNumber = recMatch[1];
+      if (!data.date && dateMatch) data.date = dateMatch[0];
     } else if (type === 'quotation') {
       const qMatch = text.match(/(?:quote|quotation|estimate)\s*(?:#|no\.?)?\s*[:.\s]?\s*([a-zA-Z0-9-_]+)/i);
-      if (qMatch) extracted.quoteNumber = qMatch[1];
+      if (!data.quoteNumber && qMatch) data.quoteNumber = qMatch[1];
+      if (!data.date && dateMatch) data.date = dateMatch[0];
     } else if (type === 'purchase_order') {
       const poMatch = text.match(/(?:purchase order|po|p\.o\.)\s*(?:#|no\.?)?\s*[:.\s]?\s*([a-zA-Z0-9-_]+)/i);
-      if (poMatch) extracted.poNumber = poMatch[1];
+      if (!data.poNumber && poMatch) data.poNumber = poMatch[1];
+      if (!data.orderDate && dateMatch) data.orderDate = dateMatch[0];
     }
-
-    extracted.extractedText = text;
-    return extracted;
   }
 
-  return {
-    ...defaults,
-    title: fileName.replace(/\.[^.]+$/, ''),
-    extractedText: text || '',
-  };
+  return data;
 }
 
 export function documentFrom(
@@ -715,4 +834,5 @@ export function documentFrom(
     metadata: { createdAt: now, updatedAt: now },
   };
 }
+
 
