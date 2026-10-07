@@ -55,12 +55,14 @@ export default function UploadFlow() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fileName: next.name, text: extractedText }),
         });
-        if (analysisResponse.ok) {
-          const analysis = await analysisResponse.json() as { type?: DocumentType; confidence?: number; data?: Record<string, unknown> };
-          if (analysis.type) supportedType = analysis.type;
-          if (typeof analysis.confidence === 'number') confidence = analysis.confidence;
-          if (analysis.data) aiData = analysis.data;
+        if (!analysisResponse.ok) {
+          const failure = await analysisResponse.json().catch(() => ({})) as { error?: string };
+          throw new Error(failure.error || 'AI analysis failed. Please try again.');
         }
+        const analysis = await analysisResponse.json() as { type?: DocumentType; confidence?: number; data?: Record<string, unknown> };
+        if (analysis.type) supportedType = analysis.type;
+        if (typeof analysis.confidence === 'number') confidence = analysis.confidence;
+        if (analysis.data) aiData = analysis.data;
       }
 
       const document = documentFrom(supportedType, { name: next.name, type: next.type || 'application/octet-stream', size: next.size }, extractedText || parsed.note || '', confidence, id, now.slice(0, 10));

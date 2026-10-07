@@ -554,6 +554,7 @@ function renderCvPdf(pdf: jsPDF, d: Record<string, unknown>, template: any, acce
     const splitSkills = pdf.splitTextToSize(skills, 178);
     pdf.text(splitSkills, 16, y);
   }
+  return;
 }
 
 function renderInvoicePdf(pdf: jsPDF, d: Record<string, unknown>, template: any, accent: RGB, docTitle = 'INVOICE') {

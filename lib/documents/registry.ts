@@ -743,6 +743,51 @@ export function emptyDataFor(type: DocumentType): Record<string, unknown> {
   }
 }
 
+function scalar(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (Array.isArray(value)) return value.join(', ');
+  if (typeof value === 'object') return JSON.stringify(value);
+  return String(value);
+}
+
+export function normalizeExtractedData(type: DocumentType, extracted: Record<string, unknown>, text: string, fileName: string, date: string) {
+  const definition = definitionFor(type);
+  const initial = initialDataFor(type, text, fileName, date);
+  const source = { ...extracted };
+  const aliases: Record<string, string[]> = {
+    fullName: ['name', 'candidateName', 'candidate_name'],
+    jobTitle: ['title', 'headline', 'role'],
+    summary: ['profile', 'professionalSummary', 'description'],
+    sellerName: ['seller', 'vendor', 'company'],
+    customerName: ['customer', 'client', 'billTo'],
+    supplierName: ['supplier', 'vendor'],
+    invoiceNumber: ['number', 'invoice_no', 'invoiceId'],
+    receiptNumber: ['number', 'receipt_no', 'receiptId'],
+    extractedText: ['rawText', 'content', 'text'],
+  };
+
+  const normalized: Record<string, unknown> = { ...initial };
+  definition.fields.forEach((field) => {
+    let value = source[field.key];
+    if (value === undefined) {
+      const alias = aliases[field.key]?.find((key) => source[key] !== undefined);
+      value = alias ? source[alias] : undefined;
+    }
+    if (value === undefined && (field.key === 'sellerName' || field.key === 'customerName')) {
+      const nested = source[field.key === 'sellerName' ? 'seller' : 'customer'];
+      value = typeof nested === 'object' && nested !== null && 'name' in nested ? nested.name : undefined;
+    }
+    if (value !== undefined) normalized[field.key] = scalar(value);
+  });
+  normalized.extractedText = text || scalar(source.extractedText) || String(initial.extractedText);
+  return normalized;
+}
+
+export function documentFrom(type: DocumentType, sourceFile: NormalizedDocumentData['sourceFile'], text: string, confidence: number, id: string, date: string): NormalizedDocumentData {
+  const now = new Date().toISOString();
+  return { id, type, confidence, sourceFile, data: initialDataFor(type, text, sourceFile.name, date), metadata: { createdAt: now, updatedAt: now } };
+}
+
 export function initialDataFor(
   type: DocumentType,
   text: string,

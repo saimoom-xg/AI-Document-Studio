@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { documentRegistry } from '@/lib/documents/registry';
+import { documentRegistry, definitionFor, normalizeExtractedData } from '@/lib/documents/registry';
 import type { DocumentType } from '@/lib/documents/types';
 
 export const runtime = 'nodejs';
@@ -19,7 +19,6 @@ export async function POST(request: Request) {
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey) {
-      // Gracefully signal to client to use client-side heuristic parser
       return NextResponse.json({
         fallback: true,
         message: 'OpenRouter API key not configured; using local heuristic extraction.',
@@ -44,7 +43,6 @@ CRITICAL RULES:
 Filename: ${fileName}
 Content:
 ${text || '[No text could be extracted in the browser]'}`;
-
 
     const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
@@ -76,11 +74,13 @@ ${text || '[No text could be extracted in the browser]'}`;
       ? (parsed.type as DocumentType)
       : 'unknown';
     const confidence = Math.max(0, Math.min(1, Number(parsed.confidence) || 0.85));
+    const extracted = parsed.data && typeof parsed.data === 'object' ? parsed.data : {};
 
     return NextResponse.json({
       type,
       confidence,
-      data: parsed.data && typeof parsed.data === 'object' ? parsed.data : {},
+      data: normalizeExtractedData(type, extracted, text, fileName, new Date().toISOString().slice(0, 10)),
+      fields: definitionFor(type).fields,
     });
   } catch {
     return NextResponse.json({ fallback: true, error: 'Analysis exception' });
