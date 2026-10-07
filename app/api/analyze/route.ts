@@ -80,7 +80,7 @@ ${text || '[No text could be extracted in the browser]'}`;
       type,
       confidence,
       data: normalizeExtractedData(type, extracted, text, fileName, new Date().toISOString().slice(0, 10)),
-      fields: definitionFor(type).fields,
+      fields: definitionFor(type).sections.flatMap((section) => section.fields ?? []),
     });
   } catch {
     return NextResponse.json({ fallback: true, error: 'Analysis exception' });

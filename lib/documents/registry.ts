@@ -754,6 +754,7 @@ export function normalizeExtractedData(type: DocumentType, extracted: Record<str
   const definition = definitionFor(type);
   const initial = initialDataFor(type, text, fileName, date);
   const source = { ...extracted };
+  const fields = definition.sections.flatMap((section) => section.fields ?? []);
   const aliases: Record<string, string[]> = {
     fullName: ['name', 'candidateName', 'candidate_name'],
     jobTitle: ['title', 'headline', 'role'],
@@ -767,7 +768,7 @@ export function normalizeExtractedData(type: DocumentType, extracted: Record<str
   };
 
   const normalized: Record<string, unknown> = { ...initial };
-  definition.fields.forEach((field) => {
+  fields.forEach((field) => {
     let value = source[field.key];
     if (value === undefined) {
       const alias = aliases[field.key]?.find((key) => source[key] !== undefined);
@@ -781,11 +782,6 @@ export function normalizeExtractedData(type: DocumentType, extracted: Record<str
   });
   normalized.extractedText = text || scalar(source.extractedText) || String(initial.extractedText);
   return normalized;
-}
-
-export function documentFrom(type: DocumentType, sourceFile: NormalizedDocumentData['sourceFile'], text: string, confidence: number, id: string, date: string): NormalizedDocumentData {
-  const now = new Date().toISOString();
-  return { id, type, confidence, sourceFile, data: initialDataFor(type, text, sourceFile.name, date), metadata: { createdAt: now, updatedAt: now } };
 }
 
 export function initialDataFor(
